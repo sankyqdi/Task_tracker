@@ -21,6 +21,7 @@ public enum ListErrors {
     JSON_FILE_NOT_FIXED(402, "JSON file not fixed"),
     JSON_FILE_NOT_READ(403, "JSON file cannot be read. {}"),
     JSON_FILE_NOT_SAVE(404, "JSON file not saved"),
+    JSON_COPY_FILE_NO_SAVE(405, "Error copy to JSON"),
 
     COMMAND_NOT_FOUND(501, "Command not found. {}"),
     COMMAND_WITHOUT_REQUIRED_ARGUMENTS(502, "Command without required arguments. Number of required arguments: {}"),

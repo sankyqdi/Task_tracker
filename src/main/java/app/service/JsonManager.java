@@ -16,7 +16,7 @@ public class JsonManager {
 
     public JsonManager() {
 
-        this(Path.of("src/main/resources/json/Tasks.json"));
+        this(Path.of("src/main/resources/json/Tasks.jsonl"));
 
     }
 
@@ -63,10 +63,14 @@ public class JsonManager {
 
     public  void endWriterTasks(Console console) {
         try {
+
             List<Task> tasks = console.consoleGetAllTasks();
             SaveJsonFile.saveAllTasks(tasks, JSON_FILE_PATH);
+
         } catch (IOException e) {
+
             throw new RuntimeException("Failed to save tasks", e);
+
         }
     }
 

@@ -32,4 +32,20 @@ public class JsonError extends FundamentError{
         super(ListErrors.JSON_FILE_NOT_SAVE, message, cause);
 
     }
+
+    //405
+    public JsonError(String message, Path pathCopy, Throwable cause) {
+
+        super(ListErrors.JSON_COPY_FILE_NO_SAVE, message + "Путь до временного файла -> " + pathCopy.toString(), cause);
+
+    }
+
+    //405
+    public JsonError(String message, Path pathCopy, Throwable cause, Throwable twoCause) {
+
+        super(ListErrors.JSON_COPY_FILE_NO_SAVE,  String.format("Ошибка записи в json файл '%s'", cause.getMessage()) + message
+                +
+                "Путь до временного файла -> " + pathCopy.toString(), twoCause);
+
+    }
 }

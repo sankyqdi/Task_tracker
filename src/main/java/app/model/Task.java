@@ -20,12 +20,15 @@ public class Task {
 
     private String body;
 
+
     private byte importanceLevel;
 
     private String stage;
 
+//    @JsonFormat(pattern = "yy-mm-dd")
     private LocalDate createdAt = LocalDate.now();
 
+//    @JsonFormat(pattern = "yy-mm-dd")
     private LocalDate dueDate;
 
     public Task() {
@@ -37,7 +40,5 @@ public class Task {
         idGenerator.set(lastId + 1);
 
     }
-
-
 
 }

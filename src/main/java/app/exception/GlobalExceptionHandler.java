@@ -101,13 +101,13 @@ public class GlobalExceptionHandler {
 
             TaskNotCreated tnc = (TaskNotCreated) fe;
 
-            sb.append("Причина ошибки: ").append(tnc.getArgs()[0].toString()).append("\n");
+            sb.append("Причина ошибки: ").append(tnc.getOriginalError().toString()).append("\n");
 
         }
 
         if (fe instanceof TaskNotUpdated) {
 
-            sb.append("Причина ошибки: ").append(fe.getArgs()[0].toString()).append("\n");
+            sb.append("Причина ошибки: ").append(fe.getOriginalError().toString()).append("\n");
 
         }
 
@@ -119,15 +119,15 @@ public class GlobalExceptionHandler {
 
         if (fe instanceof TaskNotDeleted) {
 
-            sb.append("Причина ошибки: ").append(fe.getArgs()[0].toString()).append("\n");
+            sb.append("Причина ошибки: ").append(fe.getOriginalError().toString()).append("\n");
 
         }
 
         if (fe instanceof JsonError) {
 
-            if (fe.getArgs().length != 0) {
+            if (fe.getOriginalError() != null) {
 
-                sb.append("Причина JSON ошибки: ").append(fe.getArgs()[0].toString()).append("\n");
+                sb.append("Причина JSON ошибки: ").append(fe.getOriginalError().toString()).append("\n");
                 if (fe.getListErrors().getCode() == 402 || fe.getListErrors().getCode() == 401) {
 
                     sb.append(" 🔥 Внимание! Из-за ошибки все последующие изменения в программе не будут сохранены! 🔥 ").append("\n");

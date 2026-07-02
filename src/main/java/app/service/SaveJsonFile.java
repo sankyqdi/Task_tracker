@@ -1,11 +1,13 @@
 package app.service;
 
 
+import app.exception.JsonError;
 import app.model.Task;
+import app.util.LogUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.slf4j.Logger;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -13,13 +15,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.InvalidPropertiesFormatException;
 import java.util.List;
 
 
 public class SaveJsonFile {
 
-
+    private static final Logger log = LogUtil.getLogger(SaveJsonFile.class);
 
     private static final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
@@ -27,30 +28,57 @@ public class SaveJsonFile {
     private SaveJsonFile(){}
 
     public static void saveAllTasks(List<Task> tasks, Path filePath) throws IOException {
-        ObjectMapper mapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .enable(SerializationFeature.INDENT_OUTPUT);
 
         File file = filePath.toFile();
-        File backup = new File(file.getParent(), "Tasks_backup.json");
+        File backup = new File(file.getParent(), "Tasks_backup.jsonl");
+
         if (file.exists()) {
             Files.copy(file.toPath(), backup.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        try {
-            try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
-                for (Task task : tasks) {
-                    writer.write(mapper.writeValueAsString(task));
-                    writer.write("\n");
-                }
+
+        try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
+
+            for (Task task : tasks) {
+
+                writer.write(mapper.writeValueAsString(task));
+                writer.write("\n");
+
             }
-            Files.deleteIfExists(backup.toPath());
+
+
         } catch (IOException e) {
+
             if (backup.exists()) {
-                Files.copy(backup.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                try {
+
+                    Files.copy(backup.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    log.error("Ошибка записи -> {}", e.getMessage());
+                    throw new JsonError("Ошибка записи данных файл. Данные восстановлены из резервной копии", e);
+
+
+                } catch (IOException copyError) {
+
+                    throw new JsonError("Ошибка восстановления из временного файла;  ", backup.toPath(), copyError, e);
+
+                }
+
             }
-            throw e;
+
+            throw new JsonError("Ошибка записи файла. Резервная копия не создана: ", e);
+
         }
+
+            try {
+
+                Files.deleteIfExists(backup.toPath());
+
+            } catch (IOException e) {
+
+                log.error("Не получилось удалить временный файл {}. Ошибка -> {}", backup.toPath(), e.getMessage());
+
+            }
+
     }
 
     public static List<Task> readJsonFiles(File file) throws IOException {
