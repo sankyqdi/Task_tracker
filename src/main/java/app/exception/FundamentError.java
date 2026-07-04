@@ -72,4 +72,14 @@ public class FundamentError extends RuntimeException {
 
     }
 
+    public FundamentError(ListErrors errors, Throwable cause) {
+
+        super(errors.format(cause.getMessage()));
+        this.listErrors = errors;
+        this.message = null;
+        this.args = new Object[0];
+        this.originalError = cause;
+
+    }
+
 }

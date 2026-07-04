@@ -1,6 +1,7 @@
 package app.exception;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class JsonError extends FundamentError{
@@ -48,4 +49,12 @@ public class JsonError extends FundamentError{
                 "Путь до временного файла -> " + pathCopy.toString(), twoCause);
 
     }
+
+    //406
+    public JsonError(IOException cause) {
+
+        super(ListErrors.JSON_NOT_DELETE_LINE, cause);
+
+    }
+
 }

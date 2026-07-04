@@ -2,25 +2,32 @@ package app.parser;
 
 import app.constants.ConstantHandler;
 import app.exception.*;
-import app.param.StringParam;
+import app.input.InputTaskArg;
 import app.prefix.BaseMethod;
 import app.service.Console;
 
 import java.io.FileNotFoundException;
-import java.lang.reflect.Method;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ComandParser {
+public class CommandParser {
 
+    private final Console console;
+    private final InputTaskArg inputHandler;
 
-    public static String parser(String comand, Console console)  {
+    public CommandParser(Console console, InputTaskArg inputHandler) {
 
+        this.console = console;
+        this.inputHandler = inputHandler;
+
+    }
+
+    public  String parser(String command)  {
         String outPutLine = "";
 
         Pattern pattern = Pattern.compile("^/(add|show|update|delete|com|exit)");
-        Matcher matcher = pattern.matcher(comand.trim());
+        Matcher matcher = pattern.matcher(command.trim());
 
         if (!matcher.find()) {
 
@@ -28,51 +35,15 @@ public class ComandParser {
 
         }
 
-        String[] string = comand.split(" ");
+        String[] string = command.split(" ");
 
         switch (string[0]) {
 
             case "/add" -> {
 
-                String name = "";
-                String body = "";
-                String importanceLevel = "";
-                String dueDate = "";
-
-                Method method = null;
-
-                try {
-
-                    method = Console.class.getMethod("consoleAdd", String.class, String.class, String.class, String.class);
-
-                } catch (NoSuchMethodException e) {
-
-                    throw new SystemError(e);
-
-                }
-
-                var nameMethods = StringParam.getParams(method, 4);
-                var inputUser = BaseMethod.whileAddTask();
-
-                for (int i = 0; i < nameMethods.size(); i++) {
-
-                    switch (nameMethods.get(i)) {
-
-                        case "name" -> name = inputUser.get(nameMethods.get(i));
-
-                        case "body" -> body = inputUser.get(nameMethods.get(i));
-
-                        case "importanceLevel" -> importanceLevel =  inputUser.get(nameMethods.get(i));
-
-                        case "dueDate" -> dueDate = inputUser.get(nameMethods.get(i));
-
-                    }
-
-                }
-
-                outPutLine = console.consoleAdd(name, body, importanceLevel, dueDate);
+                var taskDate = inputHandler.collectTaskDate();
+                outPutLine = console.consoleAdd(taskDate.get("name"), taskDate.get("body"), taskDate.get("importanceLevel"), taskDate.get("dueDate"));
                 return outPutLine;
-
 
             }
 
@@ -80,8 +51,7 @@ public class ComandParser {
 
                 if (console.getSizeTasks() == 0) {
 
-                    System.out.println("There are no tasks yet");
-                    return outPutLine;
+                    return "There are no tasks yet";
 
                 } else if (string.length == 1) {
 
@@ -96,19 +66,16 @@ public class ComandParser {
 
                     case "-i" -> {
 
-                        if (string.length != 3 || string[2] == null) {
+                        if (string.length != 3) {
 
                             throw new CommandNotArgument(string.length);
 
                         }
 
                         try {
-                            Long id = Long.parseLong(string[2]);
-                            if (id <= 0) {
 
-                                throw new IncorrectDataEntry("Invalid ID format");
+                            Long id = ValueParser.parsePositiveLong(string[2]);
 
-                            }
                             return console.consoleShowById(id);
 
                         } catch (NumberFormatException e) {
@@ -121,14 +88,16 @@ public class ComandParser {
 
                     case "-in" -> {
 
-                        if (string.length < 3 || string[2] == null) {
+                        if (string.length < 3) {
 
                             throw new CommandNotArgument(string.length);
 
                         }
 
                         StringBuilder partNameTask = new StringBuilder();
+
                         int count = 0;
+
                         for (var partName : string) {
 
                             if (count < 2) {
@@ -153,7 +122,7 @@ public class ComandParser {
 
                     case "-li" -> {
 
-                        if (string.length != 3 && string[2] != null) {
+                        if (string.length != 3) {
 
                             throw new CommandNotArgument(string.length);
 
@@ -172,35 +141,38 @@ public class ComandParser {
 
             case  "/update" -> {
 
-                if (string.length != 3|| string[1] == null || string[1].isEmpty()
-                        ||
-                        string[2] == null || string[2].isEmpty()) {
+                if (string.length != 3 || string[1].isEmpty() || string[2].isEmpty()) {
 
                     throw new TaskNotUpdated(new IncorrectDataEntry("Invalid command input. Insufficient data to proceed"));
 
                 }
 
-                outPutLine = BaseMethod.updateTask(console, string[1], string[2]);
+                outPutLine = BaseMethod.updateTask(console, string[1], string[2], inputHandler);
 
                 return outPutLine;
             }
 
             case "/delete" -> {
+
+                if (string.length > 3) {
+
+                    throw new CommandNotArgument(string.length);
+
+                }
+
                 if (string.length == 2) {
 
-                    if (string[1] == null || string[1].isEmpty()) {
+                    if (string[1].isEmpty()) {
 
                         throw new TaskNotDeleted(new IncorrectDataEntry("Invalid command input. Insufficient data to proceed"));
 
                     }
 
-                    return BaseMethod.deleteAllTasks(console, string[1]);
+                    return BaseMethod.deleteAllTasks(console, string[1], inputHandler);
 
                 } else if (string.length > 2) {
 
-                    if (string.length <= 3 || string[2] == null || string[2].isEmpty()
-                            ||
-                            string[3] == null || string[3].isEmpty()) {
+                    if (string[1].isEmpty() || string[2].isEmpty()) {
 
                         throw new TaskNotDeleted(new IncorrectDataEntry("Invalid command input. Insufficient data to proceed"));
 
@@ -208,7 +180,7 @@ public class ComandParser {
 
                     try {
 
-                        return BaseMethod.deleteTaskFromId(console, string[1], Long.parseLong(string[2]));
+                        return BaseMethod.deleteTaskFromId(console, string[1], ValueParser.parsePositiveLong(string[2]), inputHandler);
 
                     } catch (NumberFormatException e) {
 
@@ -219,10 +191,7 @@ public class ComandParser {
                         throw new RuntimeException(e);
 
                     }
-
                 }
-
-
             }
 
             case "/com" -> ConstantHandler.getStartMenu();
@@ -232,7 +201,4 @@ public class ComandParser {
         return "";
 
     }
-
-
-
 }

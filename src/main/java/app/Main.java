@@ -1,6 +1,10 @@
 package app;
 
+import app.input.ConsoleInput;
+import app.input.InputTaskArg;
+import app.parser.CommandParser;
 import app.screen.ConsoleWin;
+import app.service.Console;
 import app.util.LogUtil;
 import org.slf4j.Logger;
 
@@ -10,11 +14,19 @@ public class Main {
 
     public static void main(String[] args) {
 
+        Console console = new Console();
+
+        ConsoleInput consoleInput = ConsoleInput.getInstance();
+
+        InputTaskArg inputTaskArg = new InputTaskArg(consoleInput);
+
+        CommandParser commandParser = new CommandParser(console, inputTaskArg);
+
         LogUtil.logAppStart();
         log.info("Task Tracker started");
         try {
 
-            ConsoleWin.startWindow();
+            ConsoleWin.startWindow(consoleInput, commandParser, console);
 
         } catch (Exception e) {
 

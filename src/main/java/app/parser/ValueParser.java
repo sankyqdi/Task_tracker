@@ -10,19 +10,31 @@ public class ValueParser {
 
     private ValueParser(){}
 
-    public static Long parsingToString(String id) {
+    public static Long parsePositiveLong(String id) {
 
         try {
 
-            return Long.parseLong(id);
+            if (id == null || id.isEmpty()) {
+
+                throw new NumberError("ID не может быть пустым.");
+
+            }
+
+            long longId = Long.parseLong(id.trim());
+
+            if (longId <= 0) {
+
+                throw new NumberError("Id не может быть отрицательным или равен нулю");
+
+            }
+
+            return longId;
 
         } catch (NumberFormatException e){
 
             throw new NumberError("Присутствуют символы отличимые от цифр");
 
         }
-
-
     }
 
     public static LocalDate parsingDate(String date) {
@@ -39,4 +51,18 @@ public class ValueParser {
 
     }
 
+    public static boolean parsingByteBool(String input) {
+
+        try {
+
+            byte number = Byte.parseByte(input);
+            return true;
+
+        } catch (NumberFormatException e) {
+
+            return false;
+
+        }
+
+    }
 }

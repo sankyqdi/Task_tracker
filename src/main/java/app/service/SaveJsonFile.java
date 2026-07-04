@@ -1,6 +1,5 @@
 package app.service;
 
-
 import app.exception.JsonError;
 import app.model.Task;
 import app.util.LogUtil;
@@ -218,69 +217,31 @@ public class SaveJsonFile {
 
     }
 
+    public static boolean containsValidJson(File file) throws IOException {
+        if (file == null || !file.exists() || file.length() == 0) {
+            return false;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            return reader.lines()
+                    .filter(line -> !line.trim().isEmpty())
+                    .anyMatch(SaveJsonFile::isValidJson);
+        }
+    }
+
+    public static boolean isValidJson(String line) {
+        if (line == null || line.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            mapper.readTree(line);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
 }
-
-//    public static boolean searchIdSearch() {
-//
-//
-//
-//    }
-
-
-//    public static void updateJson(Task task, File file) {
-//
-//
-//        try {
-//            List<String> lines = Files.readAllLines(file.toPath());
-//            List<String> updaterLine = new ArrayList<>();
-//
-//
-//            boolean check = false;
-//
-//            for (String line : lines) {
-//
-//                if (line.trim().isEmpty()) {
-//
-//                    updaterLine.add(line);
-//                    continue;
-//
-//                }
-//
-//
-//                JsonNode node = mapper.readTree(line);
-//
-//                if (node.has("id") && node.get("id").asLong() == task.getId()) {
-//
-//                    JsonNode taskNode = mapper.valueToTree(task);
-//                    ObjectNode mergedNode = (ObjectNode) node;
-//
-//                    taskNode.fields().forEachRemaining(entry -> {
-//                        mergedNode.set(entry.getKey(), entry.getValue());
-//                    });
-//
-//                    line = mapper.writeValueAsString(mergedNode);
-//                    check = true;
-//
-//
-//                }
-//
-//                updaterLine.add(line);
-//
-//            }
-//
-//            if (!check) {
-//
-//                String jsonLine = mapper.writeValueAsString(task);
-//                updaterLine.add(jsonLine);
-//
-//            }
-//
-//            Files.write(file.toPath(), updaterLine, StandardCharsets.UTF_8);
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to update task", e);
-//        }
-//
-//    }
 
 

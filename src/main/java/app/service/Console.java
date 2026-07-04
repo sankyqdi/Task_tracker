@@ -150,8 +150,15 @@ public class Console {
     public String consoleShowById(Long id) {
         try {
 
+            long longId = id;
+            if (id > taskRepository.showSizeTask()) {
+
+                longId = taskRepository.showSizeTask();
+
+            }
+
             List<Task> tasks = new ArrayList<>();
-            tasks.add(taskRepository.getTaskById(id));
+            tasks.add(taskRepository.getTaskById(longId));
             return BaseFormat.formatShowTask(tasks);
 
         } catch (TaskNotFound e) {
@@ -271,7 +278,7 @@ public class Console {
 
     }
 
-    public String consoleDelete(Long id) throws FileNotFoundException {
+    public String consoleDeleteById(Long id) throws FileNotFoundException {
 
         var task = taskRepository.getTaskById(id);
             taskRepository.delete(id);

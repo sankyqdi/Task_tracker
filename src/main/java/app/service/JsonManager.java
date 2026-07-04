@@ -88,9 +88,17 @@ public class JsonManager {
 
     }
 
-    public void deleteLineJson(Console console, Long id) throws IOException {
+    public void deleteLineJson(Console console, Long id)  {
 
-        String operationOutput = SaveJsonFile.deleteLineById(JSON_FILE_PATH, id);
+        try {
+
+            String operationOutput = SaveJsonFile.deleteLineById(JSON_FILE_PATH, id);
+
+        } catch (IOException e) {
+
+            throw new JsonError(e);
+
+        }
 
 
     }
@@ -107,6 +115,20 @@ public class JsonManager {
         String idStr = String.valueOf(id);
 
         return SaveJsonFile.searchTaskById(JSON_FILE_PATH.toFile(), idStr.trim());
+
+    }
+
+    public boolean checkIsEmpty() {
+
+        try {
+
+            return !SaveJsonFile.containsValidJson(JSON_FILE_PATH.toFile());
+
+        } catch (IOException e) {
+
+            throw new JsonError("Файл либо запущен, либо поврежден");
+
+        }
 
     }
 

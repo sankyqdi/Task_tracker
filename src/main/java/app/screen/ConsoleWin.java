@@ -4,25 +4,22 @@ import app.constants.ConstantHandler;
 import app.constants.DataPathTextFile;
 import app.exception.FundamentError;
 import app.exception.GlobalExceptionHandler;
-import app.parser.ComandParser;
+import app.input.ConsoleInput;
+import app.parser.CommandParser;
 import app.service.Console;
 import app.util.LogUtil;
 import org.slf4j.Logger;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class ConsoleWin {
 
-    private static final Console console = new Console();
     private static final Logger log = LogUtil.getLogger(ConsoleWin.class);
     private static final GlobalExceptionHandler globalExc = GlobalExceptionHandler.getInstance();
 
-    public static void startWindow() {
-        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
-        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+    public static void startWindow(ConsoleInput consoleInput, CommandParser commandParser, Console console) {
 
         log.info("Display turned on");
 
@@ -30,7 +27,7 @@ public class ConsoleWin {
 
         System.out.println(ConstantHandler.getStartMenu());
 
-        String input = scanner.nextLine().trim();
+        String input = consoleInput.readLine();
         log.debug("User input {}", input);
 
         switch (input) {
@@ -55,28 +52,17 @@ public class ConsoleWin {
 
                 do {
 
-                    inputCommand = scanner.nextLine().trim();
+                    inputCommand = consoleInput.readLine();
 
-                    if (inputCommand.isEmpty()) {
+                    try {
 
-                        System.out.println("Ошибка. Пустой ввод команды");
-                        log.error("ERROR");
+                        System.out.println(commandParser.parser(inputCommand));
 
-                    } else {
+                    } catch (FundamentError e) {
 
-                        try {
-
-                            String returnCommand = ComandParser.parser(inputCommand, console);
-                            System.out.println(returnCommand);
-
-                        } catch (FundamentError e) {
-
-                            System.out.println(globalExc.handleException(e));
-
-                        }
+                        System.out.println(globalExc.handleException(e));
 
                     }
-
 
                 } while(!inputCommand.trim().equals("/exit"));
 
