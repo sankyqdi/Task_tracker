@@ -48,7 +48,23 @@ public class ValueParser {
             throw new DateError("Неверный формат даты");
 
         }
+    }
 
+    public static LocalDate parseDateOrNull(String date) {
+
+        if (date == null || date.isEmpty() || date.equalsIgnoreCase("null")) {
+            return null;
+        }
+
+        try {
+
+            return LocalDate.parse(date);
+
+        } catch (DateTimeParseException e) {
+
+            return null;
+
+        }
     }
 
     public static boolean parsingByteBool(String input) {
@@ -63,6 +79,25 @@ public class ValueParser {
             return false;
 
         }
+    }
 
+    public static byte parsingByte(String input) {
+
+        try {
+
+            byte number = Byte.parseByte(input);
+            if (number <= 0) {
+
+                return 1;
+
+            }
+
+            return number;
+
+        } catch (NumberFormatException e) {
+
+            throw new NumberError(e);
+
+        }
     }
 }

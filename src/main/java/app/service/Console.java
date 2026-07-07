@@ -1,328 +1,275 @@
 package app.service;
 
-import app.constants.DataDefaultNumber;
-import app.exception.*;
+import app.constants.DataConstants;
+import app.dto.TaskCreatedRequest;
+import app.dto.TaskDeletedDTO;
+import app.dto.TaskShowDTO;
 import app.format.BaseFormat;
 import app.format.DeleteFormat;
 import app.model.Task;
-import app.param.Param;
-import app.repository.TaskRepository;
 import lombok.Getter;
 
-import java.io.FileNotFoundException;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Console {
 
-    @Getter
-    private final JsonManager jsonManager = new JsonManager();
+    private TaskService taskService = new TaskService();
 
-    private final TaskRepository taskRepository = new TaskRepository();
+    private JsonManager jsonManager = new JsonManager();
 
-    public String consoleAdd(@Param("name") String name, @Param("body") String body,
-                             @Param("importanceLevel") String importanceLevel, @Param("dueDate") String dueDate) {
+    public String consoleCreateTask(String name, String body, byte importanceLevel, String stage, LocalDate dueDate) {
 
-        if (name.isEmpty() || body == null) {
+        TaskCreatedRequest taskCreatedRequest = TaskCreatedRequest.builder()
+                .name(name)
+                .body(body)
+                .importanceLevel(importanceLevel)
+                .stage(stage)
+                .dueDate(dueDate)
+                .priority(importanceLevel)
+                .build();
 
-            throw new IncorrectDataEntry("Incorrect data. \" +\n" +
-                    "\"Please review the task completion rules again.");
-
-        }
-
-        try {
-            Task task = new Task();
-            task.setName(name);
-            task.setBody(body);
-            task.setStage("Create task");
-
-            task.setDueDate(LocalDate.parse(dueDate));
-
-            if (Byte.parseByte(importanceLevel) == 0){
-
-                task.setImportanceLevel((byte) 1);
-
-            } else {
-
-                task.setImportanceLevel(Byte.parseByte(importanceLevel));
-
-            }
-
-            taskRepository.create(task);
-
-            return BaseFormat.formatCreateTask(task);
-        } catch (DateTimeParseException e) {
-
-            throw new DateError("The date is in the wrong format",  e);
-
-        }
-
-
-
-    }
-
-    public void consoleAdd(String name, String body, String importanceLevel,
-                             LocalDate dueDate, String stage, LocalDate createdAt, Long id) {
-
-        if (name.isEmpty()
-                ||
-                body == null
-                ||
-                dueDate == null
-                ||
-                stage.isEmpty()
-                ||
-                createdAt == null
-                ||
-                id == null
-        ) {
-
-            throw new TaskNotCreated(new IncorrectDataEntry("Invalid data in file"));
-
-        }
-
-        try {
-            Task task = new Task();
-            task.setName(name);
-            task.setBody(body);
-
-            task.setDueDate(dueDate);
-            task.setCreatedAt(createdAt);
-            task.setStage(stage);
-            task.setId(id);
-
-            if (Byte.parseByte(importanceLevel) == 0){
-
-                task.setImportanceLevel((byte) 1);
-
-            } else {
-
-                task.setImportanceLevel(Byte.parseByte(importanceLevel));
-
-            }
-
-            taskRepository.create(task);
-        } catch (DateTimeParseException e) {
-
-            throw new TaskNotCreated(new IncorrectDataEntry("The date from the file is in the wrong format."));
-
-        }
-
-
-
-    }
-
-    public List<Task> consoleGetAllTasks() {
-
-        return taskRepository.show();
+        return BaseFormat.formatCreateTask(taskService.createTask(taskCreatedRequest));
 
     }
 
     public String consoleShow() {
 
-        return consoleShow(DataDefaultNumber.DEFAULT_NUMBER_SIZE_TASKS);
+        return BaseFormat.formatShowTask(taskService.getAllTasks());
 
     }
 
-    public String consoleShow(Integer sizeTasks) {
+    public String consoleShow(Integer limit) {
 
+        return BaseFormat.formatShowTask(taskService.getLimitedTasks(limit));
 
+    }
 
-        if (sizeTasks == null || sizeTasks <= 0) {
+    //Сделать конфигурационный класс, где будут находиться поля по умолчанию с их заменой
+    public String consoleShow(String field) {
 
-            sizeTasks = DataDefaultNumber.DEFAULT_NUMBER_SIZE_TASKS;
+        return "";
 
-        } else if (sizeTasks > taskRepository.showSizeTask()) {
+    }
 
-            sizeTasks = taskRepository.showSizeTask();
+    public String consoleShow(Integer limit, String field) {
 
-        }
+        return "";
 
-        var tasks = taskRepository.getTasks(sizeTasks);
+    }
 
+    public String consoleShowOne(Long id) {
+
+        List<TaskShowDTO> tasks = new ArrayList<>();
+        tasks.add(taskService.getTaskById(id));
         return BaseFormat.formatShowTask(tasks);
 
+    }
+
+    public String consoleShowOne(String name) {
+
+        List<TaskShowDTO> tasks = new ArrayList<>();
+        tasks.add(taskService.getTaskByName(name));
+        return BaseFormat.formatShowTask(tasks);
 
     }
 
-    public String consoleShowById(Long id) {
+    public String consoleShowNameById(Long id) {
+
         try {
-
-            long longId = id;
-            if (id > taskRepository.showSizeTask()) {
-
-                longId = taskRepository.showSizeTask();
-
-            }
-
-            List<Task> tasks = new ArrayList<>();
-            tasks.add(taskRepository.getTaskById(longId));
-            return BaseFormat.formatShowTask(tasks);
-
-        } catch (TaskNotFound e) {
-
-            throw new TaskNotFound(id);
-
-        }
-
-    }
-
-    public  String consoleShowByName(String name) {
-
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(taskRepository.getTaskByName(name));
-        return BaseFormat.formatShowTask(tasks);
-
-
-    }
-
-    public String consoleShowImportanceTask() {
-
-        byte importanceLevel = DataDefaultNumber.DEFAULT_IMPORTANCE_LEVEL_TASKS;
-        return consoleShowImportanceTask(String.valueOf(importanceLevel));
-
-    }
-
-    public String consoleShowImportanceTask(String fixedImportanceLevel) {
-        String taskString = "Найденные задачи с уровнем важности " + fixedImportanceLevel + ":\n";
-        var tasks = taskRepository.showImportant(Byte.parseByte(fixedImportanceLevel));
-
-        if (tasks == null || tasks.isEmpty()) {
-
-            return "You don't have any important tasks.";
-
-        } else {
-
-            return taskString + BaseFormat.formatShowTask(tasks);
-
+            TaskShowDTO task = taskService.getTaskById(id);
+            return task.getName();
+        } catch (Exception e) {
+            return "Unknown";
         }
 
     }
 
     public String consoleShowStageById(Long id) {
 
-        if (id == null) {
-
-            throw new IncorrectDataEntry("Empty id input");
-
+        try {
+            TaskShowDTO task = taskService.getTaskById(id);
+            return task.getStage();
+        } catch (Exception e) {
+            return "Unknown";
         }
-
-        var task = taskRepository.getTaskById(id);
-
-        return task.getStage();
 
     }
 
-    public String consoleShowNameById(Long id) {
+    public String consoleShowDueDateById(Long id) {
 
-        if (id == null) {
-
-            throw new IncorrectDataEntry("Empty id input");
-
+        try {
+            TaskShowDTO task = taskService.getTaskById(id);
+            return task.getDueDate() != null ? task.getDueDate().toString() : "Not set";
+        } catch (Exception e) {
+            return "Unknown";
         }
-
-        var task = taskRepository.getTaskById(id);
-
-        return  task.getName();
 
     }
 
-    public  LocalDate consoleShowDueDateById(Long id) {
+    public void consoleSetStage(Long id, String stage) {
 
-        if (id == null) {
-
-            throw new IncorrectDataEntry("Empty id input");
-
-        }
-
-        var task = taskRepository.getTaskById(id);
-
-        return task.getDueDate();
+        taskService.updateTaskStage(id, stage);
 
     }
 
-    public  String consoleSetStage(Long id, String stage) {
+    public void consoleSetDueDate(Long id, String dueDate) {
 
-        if (id == null || id <= 0 || stage == null) {
-
-            throw new TaskNotUpdated("stage", new IncorrectDataEntry("Invalid data. Stage - '" + stage
-                    +
-                    "', identifier - '" + id + "'"));
-
+        try {
+            LocalDate date = LocalDate.parse(dueDate);
+            taskService.updateTaskDueDate(id, date);
+        } catch (Exception e) {
+            System.out.println("Invalid date format");
         }
-
-        var task = taskRepository.getTaskById(id);
-        return taskRepository.completedMark(task, stage).toString();
 
     }
 
-    public String consoleSetDueDate(Long id, String dueDate) {
+    public void consoleShowImportanceTask() {
 
-        if (id == null || id <= 0 || dueDate == null) {
-
-            throw new TaskNotUpdated("Completion date",
-                    new IncorrectDataEntry("Invalid data. "
-                    +
-                    "Completion date - '"
-                    +
-                    dueDate
-                    +
-                    "', identifier - '" + id + "'"));
-
-        }
-
-        var task = taskRepository.getTaskById(id);
-        return taskRepository.setDateComplate(task, LocalDate.parse(dueDate)).toString();
+        consoleShowImportanceTask(DataConstants.DEFAULT_IMPORTANCE_LEVEL_TASKS);
 
     }
 
-    public String consoleDeleteById(Long id) throws FileNotFoundException {
+    public String consoleShowImportanceTask(byte importanceLevel) {
 
-        var task = taskRepository.getTaskById(id);
-            taskRepository.delete(id);
-            return DeleteFormat.taskFormatToOne(task, jsonManager)
-                    +
-                    "\n"
-                    +
-                    "The task has been successfully deleted!\n" +
-                    "+\n" +
-                    "\"Uncompleted tasks remain:" + taskRepository.showSizeTask();
+            List<Task> tasks = taskService.getTaskImportanceLevelSorted(importanceLevel);
+            List<TaskShowDTO> showDTOs = new ArrayList<>();
+
+            for (Task task : tasks) {
+
+                showDTOs.add(TaskShowDTO.from(task));
+
+            }
+
+            return BaseFormat.formatShowTask(showDTOs);
+    }
+
+    public Integer consoleGetSizeTasks() {
+
+        return taskService.getAllTasks().size();
+
+    }
+
+    public TaskShowDTO getTaskById(Long id) {
+
+        return taskService.getTaskById(id);
 
     }
 
     public String consoleDeleteAll() {
-        String stringDeleteTasks = DeleteFormat.taskFormat(getAllNameTasks());
-        taskRepository.deleteAll();
-        return  stringDeleteTasks;
-    }
 
-    public Integer getSizeTasks() {
-
-        return taskRepository.showSizeTask();
+        taskService.deleteAllTasks();
+        return "All tasks deleted successfully";
 
     }
 
-    public Task getTaskById(Long id) {
+    public String consoleDeleteById(Long id) {
 
-        return taskRepository.getTaskById(id);
+        taskService.deleteTaskById(id);
+        return "Task with ID " + id + " deleted successfully";
 
     }
 
-    public List<String> getAllNameTasks() {
+    public String consoleUpdateStageTask(Long id, String stage) {
 
-        List<String> nameTasks = new ArrayList<>();
-        var tasks = taskRepository.show();
+        taskService.updateTaskStage(id, stage);
+        TaskShowDTO updatedTask = taskService.getTaskById(id);
+        List<TaskShowDTO> tasks = new ArrayList<>();
+        tasks.add(updatedTask);
+        return BaseFormat.formatShowTask(tasks);
 
-        for (var task : tasks) {
+    }
 
-            nameTasks.add(taskRepository.getTaskName(task));
+    public String consoleUpdateLevelTask(Long id, byte level) {
+
+        taskService.updateTaskImportanceLevel(id, level);
+        TaskShowDTO updatedTask = taskService.getTaskById(id);
+        List<TaskShowDTO> tasks = new ArrayList<>();
+        tasks.add(updatedTask);
+        return BaseFormat.formatShowTask(tasks);
+
+    }
+
+    public String consoleUpdateDueDateTask(Long id, LocalDate dueDate) {
+
+        taskService.updateTaskDueDate(id, dueDate);
+        TaskShowDTO updatedTask = taskService.getTaskById(id);
+        List<TaskShowDTO> tasks = new ArrayList<>();
+        tasks.add(updatedTask);
+        return BaseFormat.formatShowTask(tasks);
+
+    }
+
+    public String consoleDeleteTask() {
+
+        var nameTasks = taskService.getAllTaskName();
+        taskService.deleteAllTasks();
+
+        return DeleteFormat.taskFormat(nameTasks);
+
+    }
+
+    public String consoleDeleteTask(Long id) {
+
+        TaskShowDTO taskShowDTO = taskService.getTaskById(id);
+        TaskDeletedDTO task = TaskDeletedDTO.from(taskShowDTO);
+        taskService.deleteTaskById(id);
+
+        return DeleteFormat.taskFormatToOne(task, this);
+
+    }
+
+    public String rootConsoleDeleteTask() {
+
+        return "";
+
+    }
+
+    public String rootConsoleDeleteTask(Long id) {
+
+        return "";
+
+    }
+
+    public void consoleStartApp() {
+
+        var tasks = jsonManager.startWriterTasks();
+
+        for(var task : tasks) {
+
+            taskService.createTask(task);
 
         }
+    }
 
-        return nameTasks;
+    public void consoleEndApp() {
+
+        jsonManager.endWriterTasks(taskService.getAllTasks(null));
 
     }
 
+    public boolean checkIsEmpty() {
+
+        return jsonManager.checkIsEmpty();
+
+    }
+
+    public boolean checkingAvailability(Long id) throws FileNotFoundException {
+
+        return jsonManager.checkingAvailability(id);
+
+    }
+
+    public void deleteLineJson(Long id) {
+
+        jsonManager.deleteLineJson(this, id);
+
+    }
+
+    public JsonManager getJsonManager() {
+
+        return jsonManager;
+
+    }
 }

@@ -102,11 +102,11 @@ public class SaveJsonFile {
 
     public static void rewriteJsonFile(File file) throws IOException {
 
-        try (FileWriter writer = new FileWriter(file)){
-
+        try (FileWriter writer = new FileWriter(file)) {
+            // Файл будет очищен при закрытии FileWriter
         } catch (IOException e) {
 
-            throw new IOException();
+            throw new IOException("Ошибка при очистке файла задач", e);
 
         }
 
@@ -162,11 +162,11 @@ public class SaveJsonFile {
 
                 Files.write(filePath, updateList, StandardCharsets.UTF_8);
                 Files.deleteIfExists(backup.toPath());
-                return "Successful removal";
+                return "✅ Задача успешно удалена из хранилища.";
 
             } else {
 
-                return "Task with ID \" + id + \" not found in storage.";
+                return "❌ Задача с ID " + id + " не найдена в хранилище.";
 
             }
 

@@ -1,11 +1,14 @@
 package app.repository;
 
+import app.dto.TaskCreatedDTO;
 import app.exception.TaskNotFound;
 import app.model.Task;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public class TaskRepository {
 
@@ -15,14 +18,13 @@ public class TaskRepository {
         this.tasks = new ArrayList<>();
     }
 
-    public Task create(Task task) {
+    public void create(Task task) {
 
         tasks.add(task);
-        return task;
 
     }
 
-    public ArrayList<Task> show() {
+    public ArrayList<Task> findAll() {
 
         if (tasks.isEmpty()) {
 
@@ -32,7 +34,7 @@ public class TaskRepository {
         return tasks;
     }
 
-    public List<Task> getTasks(int quantity) {
+    public List<Task> findLimited(int quantity) {
 
         if (tasks.isEmpty()) {
 
@@ -52,7 +54,7 @@ public class TaskRepository {
 
     }
 
-    public Task getTaskById(Long id) {
+    public Task findById(Long id) {
 
         return tasks.stream()
                 .filter(v -> v.getId().equals(id))
@@ -61,7 +63,7 @@ public class TaskRepository {
 
     }
 
-    public Task getTaskByName(String name) {
+    public Task findByName(String name) {
 
         return tasks.stream()
                 .filter(v -> v.getName().equals(name))
@@ -69,42 +71,69 @@ public class TaskRepository {
                 .orElseThrow(() -> new TaskNotFound(name));
     }
 
-    public void delete(Long id) {
+    public List<Task> findbyDueDateSorted(LocalDate dueDate) {
+
+        return tasks.stream()
+                .filter(task -> task.getDueDate().isAfter(dueDate))
+                .sorted(Comparator.comparing(Task::getCreatedAt)
+                        .thenComparing(Task::getName))
+                .toList();
+
+    }
+
+    public Integer findSize() {
+
+        return tasks.size();
+
+    }
+
+    public String findTaskName(Task task) {
+
+        return task.getName();
+
+    }
+
+    public List<Task> findByImportanceLevelSorted(byte level) {
+
+        return tasks.stream()
+                .filter(task -> task.getImportanceLevel() == level)
+                .sorted(Comparator.comparing(Task::getDueDate)
+                        .thenComparing(Task::getCreatedAt))
+                .toList();
+
+    }
+
+    public Optional<Task> update(Task task) {
+
+        return Optional.of(
+                tasks.stream()
+                        .filter(t -> t.getId().equals(task.getId()))
+                        .findFirst()
+                        .orElseThrow(() -> new TaskNotFound("Задача не найдена"))
+        ).map(existingTask -> {
+
+            existingTask.setName(task.getName());
+            existingTask.setBody(task.getBody());
+            existingTask.setImportanceLevel(task.getImportanceLevel());
+            existingTask.setStage(task.getStage());
+            existingTask.setDueDate(task.getDueDate());
+            return existingTask;
+
+        });
+    }
+
+    public void removeById(Long id) {
+
         tasks.remove(tasks.stream()
                 .filter(v -> v.getId().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new TaskNotFound(id)));
+
     }
 
-    public void deleteAll() {
+    public void removeAll() {
+
         tasks.clear();
-    }
-
-    public Task completedMark(Task task, String stage) {
-        task.setStage(stage);
-        return task;
-    }
-
-    public Task setDateComplate(Task task, LocalDate dueDate) {
-        task.setDueDate(dueDate);
-        return task;
-    }
-
-    public List<Task> showImportant(byte level)
-    {
-        return tasks.stream()
-                            .filter(v -> v.getImportanceLevel() == level)
-                            .toList();
-
-    }
-
-    public Integer showSizeTask() {
-        return tasks.size();
-    }
-
-    public String getTaskName(Task task) {
-
-        return task.getName();
 
     }
 

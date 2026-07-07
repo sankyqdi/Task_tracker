@@ -10,10 +10,6 @@ import app.service.Console;
 import app.util.LogUtil;
 import org.slf4j.Logger;
 
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
-
 public class ConsoleWin {
 
     private static final Logger log = LogUtil.getLogger(ConsoleWin.class);
@@ -41,7 +37,7 @@ public class ConsoleWin {
                 System.out.println(ConstantHandler.getBaseCommand());
                 try {
 
-                    console.getJsonManager().startWriterTasks(console);
+                    console.consoleStartApp();
 
                 } catch (RuntimeException e) {
 
@@ -66,7 +62,7 @@ public class ConsoleWin {
 
                 } while(!inputCommand.trim().equals("/exit"));
 
-                console.getJsonManager().endWriterTasks(console);
+                console.consoleEndApp();
                 System.exit(0);
 
             }

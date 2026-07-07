@@ -26,7 +26,7 @@ public class JsonManager {
 
     }
 
-    public  void startWriterTasks (Console console) {
+    public List<Task> startWriterTasks () {
 
         try {
 
@@ -40,18 +40,13 @@ public class JsonManager {
 
             Task.setIdGenerator(id);
 
-            for (var task : tasks) {
-
-                console.consoleAdd(task.getName(), task.getBody(), String.valueOf(task.getImportanceLevel()),
-                        task.getDueDate(), task.getStage(), task.getCreatedAt(), task.getId());
-
-            }
-
             if(tasks.isEmpty()) {
 
                 throw new JsonError("The launch was successful, but no tasks were found yet.");
 
             }
+
+            return  tasks;
 
         } catch (IOException e) {
 
@@ -61,10 +56,9 @@ public class JsonManager {
 
     }
 
-    public  void endWriterTasks(Console console) {
+    public void endWriterTasks(List<Task> tasks) {
         try {
 
-            List<Task> tasks = console.consoleGetAllTasks();
             SaveJsonFile.saveAllTasks(tasks, JSON_FILE_PATH);
 
         } catch (IOException e) {
@@ -92,7 +86,7 @@ public class JsonManager {
 
         try {
 
-            String operationOutput = SaveJsonFile.deleteLineById(JSON_FILE_PATH, id);
+            SaveJsonFile.deleteLineById(JSON_FILE_PATH, id);
 
         } catch (IOException e) {
 

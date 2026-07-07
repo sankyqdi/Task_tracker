@@ -9,7 +9,7 @@ public class MapExtract {
 
     public static void extract(Map<String, String> map) throws NoSuchMethodException {
 
-        Method method = Console.class.getMethod("consoleAdd", String.class, String.class, byte.class, String.class);
+        Method method = Console.class.getMethod("consoleCreateTask", String.class, String.class, byte.class, String.class);
 
         var paramMap = StringParam.getParams(method, 4);
 

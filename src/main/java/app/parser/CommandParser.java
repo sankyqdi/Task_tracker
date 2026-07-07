@@ -23,15 +23,15 @@ public class CommandParser {
 
     }
 
-    public  String parser(String command)  {
+    public String parser(String command) {
         String outPutLine = "";
 
-        Pattern pattern = Pattern.compile("^/(add|show|update|delete|com|exit)");
+        Pattern pattern = Pattern.compile("^/(add|show|update|delete|help|com|exit)");
         Matcher matcher = pattern.matcher(command.trim());
 
         if (!matcher.find()) {
 
-            throw new CommandNotFound("Invalid command");
+            throw new CommandNotFound("❌ Неизвестная команда. Используйте /com для справки.");
 
         }
 
@@ -42,7 +42,7 @@ public class CommandParser {
             case "/add" -> {
 
                 var taskDate = inputHandler.collectTaskDate();
-                outPutLine = console.consoleAdd(taskDate.get("name"), taskDate.get("body"), taskDate.get("importanceLevel"), taskDate.get("dueDate"));
+                outPutLine = console.consoleCreateTask(taskDate.get("name"), taskDate.get("body"), Byte.parseByte(taskDate.get("importanceLevel")), taskDate.get("stage"), ValueParser.parseDateOrNull(taskDate.get("dueDate")));
                 return outPutLine;
 
             }
@@ -51,18 +51,19 @@ public class CommandParser {
 
                 if (console.getSizeTasks() == 0) {
 
-                    return "There are no tasks yet";
+                    return "⚠️  Нет задач для отображения. Создайте новую задачу с помощью /add\n";
 
                 } else if (string.length == 1) {
 
-                    return  console.consoleShow();
+                    return console.consoleShow();
 
                 }
 
-
                 switch (string[1]) {
 
-                    case "-a" -> console.consoleShow(Integer.MAX_VALUE);
+                    case "-a" -> {
+                        return console.consoleShow(Integer.MAX_VALUE);
+                    }
 
                     case "-i" -> {
 
@@ -80,7 +81,7 @@ public class CommandParser {
 
                         } catch (NumberFormatException e) {
 
-                            throw new NumberError("Invalid number format", e);
+                            throw new NumberError("❌ Неверный формат ID. Используйте только цифры (0-9)", e);
 
                         }
 
@@ -117,8 +118,9 @@ public class CommandParser {
 
                     }
 
-                    case "-l" ->  console.consoleShowImportanceTask();
-
+                    case "-l" -> {
+                        return console.consoleShowImportanceTask();
+                    }
 
                     case "-li" -> {
 
@@ -128,23 +130,29 @@ public class CommandParser {
 
                         }
 
-                        outPutLine = console.consoleShowImportanceTask(string[2]);
+                        byte level = ValueParser.parsingByte(string[2]);
+                        outPutLine = console.consoleShowImportanceTask(String.valueOf(level));
                         return outPutLine;
-
 
                     }
 
-                    default ->  console.consoleShow(Integer.MAX_VALUE);
+                    default -> {
+                        return "❌ Неизвестный префикс: " + string[1] + "\n📋 Используйте: /show -a, -i, -in, -l, -li\n";
+                    }
 
                 }
             }
 
-            case  "/update" -> {
+            case "/update" -> {
 
-                if (string.length != 3 || string[1].isEmpty() || string[2].isEmpty()) {
+                if (string.length < 2 || string[1].isEmpty()) {
 
-                    throw new TaskNotUpdated(new IncorrectDataEntry("Invalid command input. Insufficient data to proceed"));
+                    throw new TaskNotUpdated(new IncorrectDataEntry("❌ Укажите префикс и ID. Формат: /update <-префикс> <id>"));
 
+                }
+
+                if (string.length == 2) {
+                    return "❌ Укажите ID задачи. Формат: /update " + string[1] + " <id>";
                 }
 
                 outPutLine = BaseMethod.updateTask(console, string[1], string[2], inputHandler);
@@ -160,11 +168,15 @@ public class CommandParser {
 
                 }
 
+                if (string.length == 1) {
+                    return "❌ Укажите префикс. Форматы: /delete -a, -aR, -i <id>, -iR <id>";
+                }
+
                 if (string.length == 2) {
 
                     if (string[1].isEmpty()) {
 
-                        throw new TaskNotDeleted(new IncorrectDataEntry("Invalid command input. Insufficient data to proceed"));
+                        throw new TaskNotDeleted(new IncorrectDataEntry("❌ Укажите префикс удаления"));
 
                     }
 
@@ -174,7 +186,7 @@ public class CommandParser {
 
                     if (string[1].isEmpty() || string[2].isEmpty()) {
 
-                        throw new TaskNotDeleted(new IncorrectDataEntry("Invalid command input. Insufficient data to proceed"));
+                        throw new TaskNotDeleted(new IncorrectDataEntry("❌ Укажите ID задачи"));
 
                     }
 
@@ -184,7 +196,7 @@ public class CommandParser {
 
                     } catch (NumberFormatException e) {
 
-                        throw new TaskNotDeleted(new NumberError("Invalid ID format. Use only numbers [0-9]"));
+                        throw new TaskNotDeleted(new NumberError("❌ Неверный формат ID. Используйте только цифры (0-9)"));
 
                     } catch (FileNotFoundException e) {
 
@@ -194,7 +206,26 @@ public class CommandParser {
                 }
             }
 
-            case "/com" -> ConstantHandler.getStartMenu();
+            case "/help" -> {
+                return "📖 СПРАВКА ПО КОМАНДАМ\n\n"
+                        + "Основные команды:\n"
+                        + "  /add                    - Создать новую задачу\n"
+                        + "  /show [ПРЕФИКС] [ID]   - Показать задачи\n"
+                        + "  /update <ПРЕФИКС> <ID> - Обновить задачу\n"
+                        + "  /delete <ПРЕФИКС> [ID] - Удалить задачу(и)\n"
+                        + "  /help                   - Показать эту справку\n"
+                        + "  /com                    - Полная документация\n"
+                        + "  /exit                   - Выход\n\n"
+                        + "Для полной документации введите: /com\n";
+            }
+
+            case "/com" -> {
+                return ConstantHandler.getBaseCommand();
+            }
+
+            case "/exit" -> {
+                return "До свидания! 👋\n";
+            }
 
         }
 
