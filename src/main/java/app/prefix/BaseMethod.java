@@ -20,9 +20,9 @@ public class BaseMethod {
 
             case "-s" -> {
 
-                if (input.confirmAction(STR."""
-Задача \{console.consoleShowNameById(longId)} имеет на данный момент стадию: \{console.consoleShowStageById(longId)} Вы уверены, что хотите изменить?\s
- да/нет(yes/no)""")) {
+                if (input.confirmAction("Задача " + console.consoleShowNameById(longId) +
+                        " имеет на данный момент стадию: " + console.consoleShowStageById(longId) +
+                        " Вы уверены, что хотите изменить?\n да/нет(yes/no)")) {
 
                     System.out.println("Укажите новую стадию -> ");
                     String stage = input.readTaskStage();
@@ -37,15 +37,15 @@ public class BaseMethod {
 
                 }
 
-                return UpdateFormat.taskFormat(console.getTaskById(longId));
+                return UpdateFormat.taskFormat(console.consoleGetTaskById(longId));
 
             }
 
             case "-dt" -> {
 
-                if (input.confirmAction(STR."""
-Задача \{console.consoleShowNameById(longId)} имеет на данный момент срок выполнения: \{console.consoleShowDueDateById(longId)} Вы уверены, что сократить или увеличить срок выполнения?\s
- да/нет(yes/no)""")) {
+                if (input.confirmAction("Задача " + console.consoleShowNameById(longId) +
+                                        " имеет на данный момент срок выполнения: " + console.consoleShowDueDateById(longId) +
+                                        " Вы уверены, что сократить или увеличить срок выполнения?\n да/нет(yes/no)")) {
 
                     System.out.println("Укажите новый срок выполнения задачи -> ");
                     String dueDate = input.readTaskDueDate();
@@ -53,7 +53,7 @@ public class BaseMethod {
                     console.consoleSetDueDate(longId, dueDate);
                     System.out.println("✅ Срок выполнения задачи успешно обновлена!");
 
-                    return UpdateFormat.taskFormat(console.getTaskById(longId));
+                    return UpdateFormat.taskFormat(console.consoleGetTaskById(longId));
 
                 } else {
 
@@ -73,7 +73,6 @@ public class BaseMethod {
 
         final String CANCELLED_MESSAGE = "❌ Операция отменена. Данные не были удалены.";
         final String NULL_STORAGE_MESSAGE =  "ℹ️ Хранилище пусто. Данные не удалены";
-        final String SUCCESS_MESSAGE = "✅ Все прошло успешно! Хранилище приложения полностью пустое";
 
 
         switch (prefix) {
@@ -98,9 +97,7 @@ public class BaseMethod {
 
                 }
 
-                String deleteString = console.consoleDeleteAll();
-                System.out.println(SUCCESS_MESSAGE);
-                return deleteString;
+                return console.consoleDeleteTask();
 
             }
 
@@ -128,9 +125,8 @@ public class BaseMethod {
 
                 }
 
-                String outPutLine = console.consoleDeleteAll();
+                String outPutLine = console.rootConsoleDeleteTask();
                 console.getJsonManager().turningEmptyFile();
-                System.out.println(SUCCESS_MESSAGE + " Начните все с чистого листа!");
                 return outPutLine;
 
             }
@@ -170,9 +166,7 @@ public class BaseMethod {
 
                 try {
 
-                    String deleteString = console.consoleDeleteById(id);
-                    System.out.println("✅ Все прошло успешно! Задача с id: " + id + " полностью удалена из хранилища. ");
-                    return deleteString;
+                    return console.consoleDeleteTask(id);
 
                 } catch (Exception e) {
 
@@ -204,7 +198,7 @@ public class BaseMethod {
 
                 }
 
-                String outPutLine = console.consoleDeleteById(id);
+                String outPutLine = console.rootConsoleDeleteTask(id);
                 console.deleteLineJson(id);
                 System.out.println("✅ Все прошло успешно! Задача с id: " + id + " полностью удалена из всех хранилищ. ");
 

@@ -23,8 +23,6 @@ public class TaskCreatedDTO {
 
     private byte importanceLevel;
 
-    private byte priority;
-
     private LocalDate dueDate;
 
     private LocalDate createdAt;
@@ -46,7 +44,6 @@ public class TaskCreatedDTO {
                 .name(task.getName())
                 .body(task.getBody())
                 .importanceLevel(task.getImportanceLevel())
-                .priority(task.getPriority())
                 .dueDate(task.getDueDate())
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())

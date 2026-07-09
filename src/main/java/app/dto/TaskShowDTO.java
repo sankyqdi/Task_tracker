@@ -25,8 +25,6 @@ public class TaskShowDTO {
 
     private byte importanceLevel;
 
-    private byte priority;
-
     private String stage;
 
     private LocalDate createdAt;
@@ -50,7 +48,6 @@ public class TaskShowDTO {
                 .name(task.getName())
                 .body(task.getBody())
                 .importanceLevel(task.getImportanceLevel())
-                .priority(task.getPriority())
                 .stage(task.getStage())
                 .createdAt(task.getCreatedAt())
                 .updatedAt(task.getUpdatedAt())

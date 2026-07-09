@@ -37,8 +37,6 @@ public class Task {
 
     private boolean isCompleted = false;
 
-    private byte priority;
-
     private Set<TaskTag> builtInTags = new HashSet<>();
 
     private List<String> customTags = new ArrayList<>();
@@ -51,7 +49,6 @@ public class Task {
         this.importanceLevel = importanceLevel;
         this.dueDate = dueDate;
         this.stage = stage;
-        this.priority = importanceLevel;
         this.isCompleted = false;
 
     }

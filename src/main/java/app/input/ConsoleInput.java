@@ -1,6 +1,7 @@
 package app.input;
 
 import app.parser.ValueParser;
+import app.util.ConsoleHelper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
@@ -26,8 +27,21 @@ public class ConsoleInput {
 
     public String readLine() {
 
-        return scanner.nextLine().trim();
 
+
+        while(true) {
+
+            String input = scanner.nextLine().trim();
+
+            if (input.isEmpty()) {
+
+                continue;
+
+            }
+
+            return input;
+
+        }
     }
 
     public String readLine(String message) {
@@ -50,6 +64,74 @@ public class ConsoleInput {
 
         }
 
+    }
+
+    public String readLine(String message, int limitSymbol) {
+
+        System.out.println(message);
+
+        while(true) {
+
+
+            String input = scanner.nextLine().trim();
+
+            if (input.length() > limitSymbol && input.isEmpty()) {
+
+                System.out.println("Ввод не должен быть пустым и не должен превышать лимит в " + limitSymbol + " символов");
+                continue;
+
+            }
+
+            return input;
+        }
+
+    }
+
+    public Integer readLineInteger() {
+
+        while (true) {
+
+
+            String input = scanner.nextLine().trim();
+
+            if (input.isEmpty()) {
+
+                System.out.println("Ввод не должен быть пустым");
+                continue;
+
+            }
+
+            return ValueParser.parsingInt(input);
+
+        }
+
+    }
+
+    public Integer readLineInteger(int min, int max) {
+        while (true) {
+
+
+            String input = scanner.nextLine().trim();
+
+            if (input.isEmpty()) {
+
+                System.out.println("Ввод не должен быть пустым");
+                continue;
+
+            }
+
+            int integerInput = ValueParser.parsingInt(input);
+
+            if (integerInput < min || integerInput > max) {
+
+                ConsoleHelper.println("Число не входит в заданный промежуток. min - " + min + " max - " + max);
+                continue;
+
+            }
+
+            return integerInput;
+
+        }
     }
 
     public Long readLineLong(String message) {

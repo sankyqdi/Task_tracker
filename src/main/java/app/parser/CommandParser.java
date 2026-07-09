@@ -1,8 +1,10 @@
 package app.parser;
 
+import app.config.ConfigurationManager;
 import app.constants.ConstantHandler;
 import app.exception.*;
 import app.input.InputTaskArg;
+import app.model.TaskTag;
 import app.prefix.BaseMethod;
 import app.service.Console;
 
@@ -15,6 +17,7 @@ public class CommandParser {
 
     private final Console console;
     private final InputTaskArg inputHandler;
+    private final ConfigurationManager instance = ConfigurationManager.getInstance();
 
     public CommandParser(Console console, InputTaskArg inputHandler) {
 
@@ -42,14 +45,22 @@ public class CommandParser {
             case "/add" -> {
 
                 var taskDate = inputHandler.collectTaskDate();
-                outPutLine = console.consoleCreateTask(taskDate.get("name"), taskDate.get("body"), Byte.parseByte(taskDate.get("importanceLevel")), taskDate.get("stage"), ValueParser.parseDateOrNull(taskDate.get("dueDate")));
+                var taskTags = inputHandler.collectTaskTags();
+                outPutLine = console.consoleCreateTask(taskDate.get("name"),
+                        taskDate.get("body"),
+                        Byte.parseByte(taskDate.get("importanceLevel")),
+                        taskDate.get("stage"),
+                        ValueParser.parseDateOrNull(taskDate.get("dueDate")),
+                        taskTags.get("builtInTags"),
+                        taskTags.get("customTags")
+                        );
                 return outPutLine;
 
             }
 
             case "/show" -> {
 
-                if (console.getSizeTasks() == 0) {
+                if (console.consoleGetSizeTasks() == 0) {
 
                     return "⚠️  Нет задач для отображения. Создайте новую задачу с помощью /add\n";
 
@@ -77,7 +88,7 @@ public class CommandParser {
 
                             Long id = ValueParser.parsePositiveLong(string[2]);
 
-                            return console.consoleShowById(id);
+                            return console.consoleShowOne(id);
 
                         } catch (NumberFormatException e) {
 
@@ -113,13 +124,15 @@ public class CommandParser {
 
                         }
 
-                        outPutLine = console.consoleShowByName(partNameTask.toString().trim());
+                        outPutLine = console.consoleShowOne(partNameTask.toString().trim());
                         return outPutLine;
 
                     }
 
                     case "-l" -> {
-                        return console.consoleShowImportanceTask();
+
+                        return console.consoleShow("level");
+
                     }
 
                     case "-li" -> {
@@ -130,9 +143,11 @@ public class CommandParser {
 
                         }
 
-                        byte level = ValueParser.parsingByte(string[2]);
-                        outPutLine = console.consoleShowImportanceTask(String.valueOf(level));
-                        return outPutLine;
+                        instance.setImplementsLevel(ValueParser.parsingByte(string[2]));
+
+                        //Добавить 3 объект массива, для указания лимита задач. Также в конфигурацию
+
+                        return console.consoleShow("level");
 
                     }
 

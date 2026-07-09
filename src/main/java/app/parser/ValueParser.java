@@ -100,4 +100,17 @@ public class ValueParser {
 
         }
     }
+
+    public static int parsingInt(String input) {
+
+        try {
+
+            return Integer.parseInt(input);
+
+        } catch (NumberFormatException e) {
+
+            throw new NumberError(e);
+
+        }
+    }
 }

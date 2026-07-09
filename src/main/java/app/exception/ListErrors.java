@@ -6,6 +6,7 @@ import lombok.Getter;
 public enum ListErrors {
 
     SYSTEM_ERROR(101, "Code error. Cause -> {}"),
+    ROOT_ERROR(102, "Root access is missing."),
 
     USER_INPUT_ERROR(201, "User input error"),
     USER_CANCELLED(202, "User cancelled"),

@@ -3,6 +3,7 @@ package app.repository;
 import app.dto.TaskCreatedDTO;
 import app.exception.TaskNotFound;
 import app.model.Task;
+import app.model.TaskTag;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -99,6 +100,24 @@ public class TaskRepository {
                 .filter(task -> task.getImportanceLevel() == level)
                 .sorted(Comparator.comparing(Task::getDueDate)
                         .thenComparing(Task::getCreatedAt))
+                .toList();
+
+    }
+
+    public List<Task> findStageSorted(String stage) {
+
+        return tasks.stream()
+                .filter(task -> task.getStage().equals(stage))
+                .sorted(Comparator.comparing(Task::getName))
+                .toList();
+
+    }
+
+    public List<Task> findTagsSorted(TaskTag tag) {
+
+        return tasks.stream()
+                .filter(task -> task.getBuiltInTags().contains(tag))
+                .sorted(Comparator.comparing(Task::getName))
                 .toList();
 
     }

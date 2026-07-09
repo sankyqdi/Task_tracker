@@ -19,7 +19,6 @@ public class BaseFormat {
                 + "╠════════════════════════════════════════════════════════╣\n"
                 + "║ Описание:         " + task.getBody() + "\n"
                 + "║ Важность:        " + getImportanceLabel(task.getImportanceLevel()) + " (" + task.getImportanceLevel() + "/10)\n"
-                + "║ Приоритет:       " + getPriorityLabel(task.getPriority()) + " (" + task.getPriority() + "/10)\n"
                 + "╠════════════════════════════════════════════════════════╣\n"
                 + "║ Создано:         " + task.getCreatedAt() + "\n"
                 + "║ Обновлено:       " + task.getUpdatedAt() + "\n"
@@ -48,8 +47,6 @@ public class BaseFormat {
             sb.append("║ 📌 Стадия:      ").append(task.getStage()).append("\n");
             sb.append("║ ⚡ Важность:    ").append(getImportanceLabel(task.getImportanceLevel()))
                     .append(" (").append(task.getImportanceLevel()).append("/10)\n");
-            sb.append("║ 🎯 Приоритет:   ").append(getPriorityLabel(task.getPriority()))
-                    .append(" (").append(task.getPriority()).append("/10)\n");
             sb.append("║ 📅 Срок:        ").append(task.getDueDate() != null ? task.getDueDate() : "—").append("\n");
             sb.append("║ ⏱️  Время (ч):   ").append(task.getEstimatedHours() != null ? String.format("%.1f", task.getEstimatedHours()) + " ч" : "—").append("\n");
             sb.append("║ ✓ Статус:       ").append(task.isCompleted() ? "✅ Завершено" : "⏳ В процессе").append("\n");

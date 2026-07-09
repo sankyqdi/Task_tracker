@@ -23,8 +23,6 @@ public class TaskCreatedRequest {
 
     private byte importanceLevel;
 
-    private byte priority;
-
     private String stage;
 
     private LocalDate dueDate;

@@ -6,8 +6,6 @@ import java.util.Map;
 
 public class  StringParam {
 
-
-
     public static Map<Integer, String> getParams(Method method, int sizeParams) {
 
         Map<Integer, String> map = new HashMap<>();

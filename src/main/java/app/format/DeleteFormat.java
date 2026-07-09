@@ -19,6 +19,41 @@ public class DeleteFormat extends BaseFormat{
         sb.append("\n╔════════════════════════════════════════════════════════╗\n");
         sb.append("║              🗑️  ЗАДАЧИ УДАЛЕНЫ ИЗ ПАМЯТИ            ║\n");
         sb.append("╚════════════════════════════════════════════════════════╝\n\n");
+        for (int i = 0; i < nameTasks.size(); i++) {
+            sb.append("  ").append(i + 1).append(". ❌ ").append(nameTasks.get(i)).append(" — удалено\n");
+        }
+        sb.append("\n✅ Всего удалено задач: ").append(nameTasks.size()).append("\n");
+        sb.append("ℹ️  Данные остаются в хранилище и восстановятся при перезапуске.\n\n");
+        return sb.toString();
+
+    }
+
+    public static String taskFormatToOne(TaskDeletedDTO task)  {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("\n╔════════════════════════════════════════════════════════╗\n");
+        sb.append("║           🗑️  ЗАДАЧА УДАЛЕНА ИЗ ПАМЯТИ               ║\n");
+        sb.append("╚════════════════════════════════════════════════════════╝\n");
+        sb.append("║ ID:       #").append(String.format("%04d", task.getId())).append("\n");
+        sb.append("║ Название: ").append(task.getName()).append("\n");
+        sb.append("╠════════════════════════════════════════════════════════╣\n");
+        sb.append("║ 📦 Данные СОХРАНЕНЫ в хранилище (JSON файл)\n");
+        sb.append("║ 🔄 Восстановятся при перезапуске приложения\n");
+        sb.append("║ 📍 ID задачи в хранилище: #").append(String.format("%04d", task.getId())).append("\n");
+        sb.append("║\n");
+        sb.append("║ ℹ️  Для полного удаления используйте: /delete -iR ").append(task.getId()).append("\n");
+        sb.append("╚════════════════════════════════════════════════════════╝\n\n");
+        return sb.toString();
+
+    }
+
+    public static String rootTaskFormat(List<String> nameTasks) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n╔════════════════════════════════════════════════════════╗\n");
+        sb.append("║              🗑️  ЗАДАЧИ УДАЛЕНЫ ИЗ ПАМЯТИ            ║\n");
+        sb.append("╚════════════════════════════════════════════════════════╝\n\n");
 
         if (nameTasks == null || nameTasks.isEmpty()) {
             sb.append("⚠️  Нет задач для удаления.\n\n");
@@ -30,13 +65,13 @@ public class DeleteFormat extends BaseFormat{
         }
 
         sb.append("\n✅ Всего удалено задач: ").append(nameTasks.size()).append("\n");
-        sb.append("ℹ️  Данные остаются в хранилище и восстановятся при перезапуске.\n\n");
+        sb.append("⚠️ Данные полностью удалены. Восстановление невозможно \n\n");
 
         return sb.toString();
 
     }
 
-    public static String taskFormatToOne(TaskDeletedDTO task, Console console)  {
+    public static String rootTaskFormat(TaskDeletedDTO task) {
 
         StringBuilder sb = new StringBuilder();
 
@@ -46,28 +81,8 @@ public class DeleteFormat extends BaseFormat{
         sb.append("║ ID:       #").append(String.format("%04d", task.getId())).append("\n");
         sb.append("║ Название: ").append(task.getName()).append("\n");
         sb.append("╠════════════════════════════════════════════════════════╣\n");
-
-        try {
-            if (console.checkingAvailability(task.getId())) {
-
-                sb.append("║ 📦 Данные СОХРАНЕНЫ в хранилище (JSON файл)\n");
-                sb.append("║ 🔄 Восстановятся при перезапуске приложения\n");
-                sb.append("║ 📍 ID задачи в хранилище: #").append(String.format("%04d", task.getId())).append("\n");
-                sb.append("║\n");
-                sb.append("║ ℹ️  Для полного удаления используйте: /delete -iR ").append(task.getId()).append("\n");
-
-            } else {
-
-                sb.append("║ ❌ Данные НЕ найдены в хранилище\n");
-                sb.append("║ 🗂️  Задача была удалена ранее или не была сохранена\n");
-
-            }
-        } catch (FileNotFoundException e) {
-
-            throw new FormatFailed(e);
-
-        }
-
+        sb.append("║ ⚠️ Данные задачи полностью удалены. \n");
+        sb.append("║ ❌  Восстановление невозможно\n");
         sb.append("╚════════════════════════════════════════════════════════╝\n\n");
         return sb.toString();
 

@@ -33,15 +33,12 @@ public class TaskUpdatedDTO {
 
     private List<String> customTags;
 
-    private Double estimatedHours;
-
     public static TaskUpdatedDTO from(Task task) {
 
         return TaskUpdatedDTO.builder()
                 .name(task.getName())
                 .body(task.getBody())
                 .stage(task.getStage())
-                .priority(task.getPriority())
                 .dueDate(task.getDueDate())
                 .updatedAt(task.getUpdatedAt())
                 .isCompleted(task.isCompleted())
@@ -49,7 +46,6 @@ public class TaskUpdatedDTO {
                         .map(TaskTag::getFormattedTag)
                         .collect(Collectors.toList()))
                 .customTags(task.getCustomTags())
-                .estimatedHours(task.getEstimatedHours())
                 .build();
     }
 }

@@ -4,6 +4,7 @@ plugins {
 
 application {
     mainClass.set("app.Main")
+    applicationDefaultJvmArgs = listOf("-Dfile.encoding=UTF-8")
 }
 
 group = "app"

@@ -1,25 +1,28 @@
 package app.service;
 
-import app.constants.DataConstants;
+import app.config.ConfigurationManager;
 import app.dto.TaskCreatedRequest;
 import app.dto.TaskDeletedDTO;
 import app.dto.TaskShowDTO;
+import app.exception.RootAccessDeniedException;
 import app.format.BaseFormat;
 import app.format.DeleteFormat;
-import app.model.Task;
 import lombok.Getter;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Console {
 
-    private TaskService taskService = new TaskService();
+    private final TaskService taskService = new TaskService();
 
-    private JsonManager jsonManager = new JsonManager();
+    @Getter
+    private final JsonManager jsonManager = new JsonManager();
 
-    public String consoleCreateTask(String name, String body, byte importanceLevel, String stage, LocalDate dueDate) {
+    private final ConfigurationManager instance = ConfigurationManager.getInstance();
+
+    public String consoleCreateTask(String name, String body, byte importanceLevel, String stage,
+                                    LocalDate dueDate, List<String> taskTag, List<String> customTag) {
 
         TaskCreatedRequest taskCreatedRequest = TaskCreatedRequest.builder()
                 .name(name)
@@ -27,7 +30,8 @@ public class Console {
                 .importanceLevel(importanceLevel)
                 .stage(stage)
                 .dueDate(dueDate)
-                .priority(importanceLevel)
+                .builtInTags(taskTag)
+                .customTags(customTag)
                 .build();
 
         return BaseFormat.formatCreateTask(taskService.createTask(taskCreatedRequest));
@@ -46,14 +50,43 @@ public class Console {
 
     }
 
-    //Сделать конфигурационный класс, где будут находиться поля по умолчанию с их заменой
     public String consoleShow(String field) {
+
+        if (consoleGetSizeTasks() == 0) {
+
+            return "Задач в памяти не найдено";
+
+        }
+
+        switch (field) {
+
+            case "stage" -> BaseFormat.formatShowTask(taskService.getTaskStageSorted(instance.getStage()));
+            case "dueDate" ->  BaseFormat.formatShowTask(taskService.getTaskDueDateSorted(instance.getDueDate()));
+            case "tag" -> BaseFormat.formatShowTask(taskService.getTaskTagSorted(instance.getTaskTag()));
+            case "level" -> BaseFormat.formatShowTask(taskService.getTaskImportanceLevelSorted(instance.getImplementsLevel()));
+
+        }
 
         return "";
 
     }
 
-    public String consoleShow(Integer limit, String field) {
+    public String consoleShow(int limit, String field) {
+
+        if (consoleGetSizeTasks() == 0) {
+
+            return "Задач в памяти не найдено";
+
+        }
+
+        switch (field) {
+
+            case "stage" -> BaseFormat.formatShowTask(taskService.getTaskStageSorted(instance.getStage(), limit));
+            case "dueDate" ->  BaseFormat.formatShowTask(taskService.getTaskDueDateSorted(instance.getDueDate(), limit));
+            case "tag" -> BaseFormat.formatShowTask(taskService.getTaskTagSorted(instance.getTaskTag(), limit));
+            case "level" -> BaseFormat.formatShowTask(taskService.getTaskImportanceLevelSorted(instance.getImplementsLevel(), limit));
+
+        }
 
         return "";
 
@@ -125,49 +158,15 @@ public class Console {
 
     }
 
-    public void consoleShowImportanceTask() {
-
-        consoleShowImportanceTask(DataConstants.DEFAULT_IMPORTANCE_LEVEL_TASKS);
-
-    }
-
-    public String consoleShowImportanceTask(byte importanceLevel) {
-
-            List<Task> tasks = taskService.getTaskImportanceLevelSorted(importanceLevel);
-            List<TaskShowDTO> showDTOs = new ArrayList<>();
-
-            for (Task task : tasks) {
-
-                showDTOs.add(TaskShowDTO.from(task));
-
-            }
-
-            return BaseFormat.formatShowTask(showDTOs);
-    }
-
     public Integer consoleGetSizeTasks() {
 
         return taskService.getAllTasks().size();
 
     }
 
-    public TaskShowDTO getTaskById(Long id) {
+    public TaskShowDTO consoleGetTaskById(Long id) {
 
         return taskService.getTaskById(id);
-
-    }
-
-    public String consoleDeleteAll() {
-
-        taskService.deleteAllTasks();
-        return "All tasks deleted successfully";
-
-    }
-
-    public String consoleDeleteById(Long id) {
-
-        taskService.deleteTaskById(id);
-        return "Task with ID " + id + " deleted successfully";
 
     }
 
@@ -216,19 +215,39 @@ public class Console {
         TaskDeletedDTO task = TaskDeletedDTO.from(taskShowDTO);
         taskService.deleteTaskById(id);
 
-        return DeleteFormat.taskFormatToOne(task, this);
+        return DeleteFormat.taskFormatToOne(task);
 
     }
 
     public String rootConsoleDeleteTask() {
 
-        return "";
+        if (!instance.getRoot()) {
+
+            throw new RootAccessDeniedException();
+
+        }
+
+        var nameTask = taskService.getAllTaskName();
+        jsonManager.turningEmptyFile();
+        consoleDeleteTask();
+
+        return DeleteFormat.rootTaskFormat(nameTask);
 
     }
 
     public String rootConsoleDeleteTask(Long id) {
 
-        return "";
+        if (!instance.getRoot()) {
+
+            throw new RootAccessDeniedException();
+
+        }
+
+        TaskDeletedDTO taskDeletedDTO = TaskDeletedDTO.from(taskService.getTaskById(id));
+        jsonManager.turningEmptyFile();
+        consoleDeleteTask();
+
+        return DeleteFormat.rootTaskFormat(taskDeletedDTO);
 
     }
 
@@ -255,9 +274,9 @@ public class Console {
 
     }
 
-    public boolean checkingAvailability(Long id) throws FileNotFoundException {
+    public boolean checkingAvailability(Long id)  {
 
-        return jsonManager.checkingAvailability(id);
+            return jsonManager.checkingAvailability(id);
 
     }
 
@@ -267,9 +286,4 @@ public class Console {
 
     }
 
-    public JsonManager getJsonManager() {
-
-        return jsonManager;
-
-    }
 }

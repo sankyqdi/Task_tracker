@@ -7,6 +7,7 @@ import app.exception.GlobalExceptionHandler;
 import app.input.ConsoleInput;
 import app.parser.CommandParser;
 import app.service.Console;
+import app.util.ConsoleHelper;
 import app.util.LogUtil;
 import org.slf4j.Logger;
 
@@ -21,7 +22,7 @@ public class ConsoleWin {
 
         ImageToAscii.printFromFile(DataPathTextFile.PATH_FOR_IMAGE, 185);
 
-        System.out.println(ConstantHandler.getStartMenu());
+        ConsoleHelper.println(ConstantHandler.getStartMenu());
 
         String input = consoleInput.readLine();
         log.debug("User input {}", input);
@@ -34,14 +35,14 @@ public class ConsoleWin {
 
                 String inputCommand = "";
 
-                System.out.println(ConstantHandler.getBaseCommand());
+                ConsoleHelper.println(ConstantHandler.getBaseCommand());
                 try {
 
                     console.consoleStartApp();
 
                 } catch (RuntimeException e) {
 
-                    System.out.println(globalExc.handleException(e));
+                    ConsoleHelper.println(globalExc.handleException(e));
 
                 }
 
@@ -52,11 +53,11 @@ public class ConsoleWin {
 
                     try {
 
-                        System.out.println(commandParser.parser(inputCommand));
+                        ConsoleHelper.println(commandParser.parser(inputCommand));
 
                     } catch (FundamentError e) {
 
-                        System.out.println(globalExc.handleException(e));
+                        ConsoleHelper.println(globalExc.handleException(e));
 
                     }
 
@@ -71,7 +72,7 @@ public class ConsoleWin {
             }
 
             default -> {
-                System.out.println("Неправильная команда. Попытайтесь снова");
+                ConsoleHelper.println("Неправильная команда. Попытайтесь снова");
             }
         }
     }

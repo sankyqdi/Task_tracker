@@ -4,6 +4,7 @@ import app.dto.TaskCreatedDTO;
 import app.dto.TaskCreatedRequest;
 import app.dto.TaskShowDTO;
 import app.model.Task;
+import app.model.TaskTag;
 import app.repository.TaskRepository;
 
 import java.util.ArrayList;
@@ -28,11 +29,6 @@ public class TaskService {
                 taskDTO.getDueDate()
         );
 
-        if (taskDTO.getPriority() > 0) {
-            task.setPriority(taskDTO.getPriority());
-        }
-
-        if (taskDTO.getBuiltInTags() != null && !taskDTO.getBuiltInTags().isEmpty()) {
             for (String tagName : taskDTO.getBuiltInTags()) {
                 try {
                     task.addBuiltInTag(Enum.valueOf(app.model.TaskTag.class, tagName.toUpperCase()));
@@ -40,9 +36,8 @@ public class TaskService {
                     // Skip invalid tag names
                 }
             }
-        }
 
-        if (taskDTO.getCustomTags() != null && !taskDTO.getCustomTags().isEmpty()) {
+        if (!taskDTO.getCustomTags().isEmpty()) {
             for (String customTag : taskDTO.getCustomTags()) {
                 task.addCustomTag(customTag);
             }
@@ -102,16 +97,56 @@ public class TaskService {
 
     }
 
-    public List<Task> getTaskImportanceLevelSorted(byte level) {
-
-        return taskRepository.findByImportanceLevelSorted(level);
-
+    public List<TaskShowDTO> getTaskImportanceLevelSorted(byte level) {
+        return taskRepository.findByImportanceLevelSorted(level).stream()
+                .map(TaskShowDTO::from)
+                .toList();
     }
 
-    public List<Task> getTaskDueDateSorted(LocalDate dueDate) {
+    public List<TaskShowDTO> getTaskImportanceLevelSorted(byte level, int limit) {
+        return taskRepository.findByImportanceLevelSorted(level).stream()
+                .map(TaskShowDTO::from)
+                .limit(limit)
+                .toList();
+    }
 
-        return taskRepository.findbyDueDateSorted(dueDate);
+    public List<TaskShowDTO> getTaskDueDateSorted(LocalDate dueDate) {
+        return taskRepository.findbyDueDateSorted(dueDate).stream()
+                .map(TaskShowDTO::from)
+                .toList();
+    }
 
+    public List<TaskShowDTO> getTaskDueDateSorted(LocalDate dueDate, int limit) {
+        return taskRepository.findbyDueDateSorted(dueDate).stream()
+                .map(TaskShowDTO::from)
+                .limit(limit)
+                .toList();
+    }
+
+    public List<TaskShowDTO> getTaskStageSorted(String stage) {
+        return taskRepository.findStageSorted(stage).stream()
+                .map(TaskShowDTO::from)
+                .toList();
+    }
+
+    public List<TaskShowDTO> getTaskStageSorted(String stage, int limit) {
+        return taskRepository.findStageSorted(stage).stream()
+                .map(TaskShowDTO::from)
+                .limit(limit)
+                .toList();
+    }
+
+    public List<TaskShowDTO> getTaskTagSorted(TaskTag taskTag) {
+        return taskRepository.findTagsSorted(taskTag).stream()
+                .map(TaskShowDTO::from)
+                .toList();
+    }
+
+    public List<TaskShowDTO> getTaskTagSorted(TaskTag taskTag, int limit) {
+        return taskRepository.findTagsSorted(taskTag).stream()
+                .map(TaskShowDTO::from)
+                .limit(limit)
+                .toList();
     }
 
     public List<String> getAllTaskName() {
@@ -144,15 +179,6 @@ public class TaskService {
 
         Task task = taskRepository.findById(id);
         task.setImportanceLevel(level);
-        task.setUpdatedAt(LocalDate.now());
-        taskRepository.update(task);
-
-    }
-
-    public void updateTaskPriority(Long id, byte priority) {
-
-        Task task = taskRepository.findById(id);
-        task.setPriority(priority);
         task.setUpdatedAt(LocalDate.now());
         taskRepository.update(task);
 

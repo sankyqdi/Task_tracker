@@ -74,32 +74,31 @@ public class GlobalExceptionHandler {
         sb.append("  📝 ").append(fe.getMessage()).append("\n");
 
 
-        if (fe instanceof DateError) {
-            DateError de = (DateError) fe;
+        if (fe instanceof DateError de) {
 
             sb.append("Неправильный формат: ").append(de.getMessage()).append("\n");
 
         }
 
-        if (fe instanceof NumberError) {
+        if (fe instanceof RootAccessDeniedException ro) {
 
-            NumberError ne = (NumberError) fe;
+            sb.append("Ой, у вас что-то с правами доступа. ").append(ro.getMessage()).append("\n");
+
+        }
+
+        if (fe instanceof NumberError ne) {
 
             sb.append("Неправильный формат: ").append(ne.getMessage()).append("\n");
 
         }
 
-        if (fe instanceof IncorrectDataEntry) {
-
-            IncorrectDataEntry ide = (IncorrectDataEntry) fe;
+        if (fe instanceof IncorrectDataEntry ide) {
 
             sb.append("Ввод пользователя: ").append(ide.getMessage()).append("\n");
 
         }
 
-        if (fe instanceof TaskNotCreated) {
-
-            TaskNotCreated tnc = (TaskNotCreated) fe;
+        if (fe instanceof TaskNotCreated tnc) {
 
             sb.append("Причина ошибки: ").append(tnc.getOriginalError().toString()).append("\n");
 
@@ -146,7 +145,7 @@ public class GlobalExceptionHandler {
 
             } else {
 
-                sb.append("Задач во внутренней памяти не обнаружено.");
+                sb.append("Задач во внутренней памяти не обнаружено.").append("\n");
 
             }
 
@@ -215,6 +214,12 @@ public class GlobalExceptionHandler {
             case SystemError systemError -> {
 
                 return "Обратитесь к разработчику";
+
+            }
+
+            case RootAccessDeniedException rootAccessDeniedException -> {
+
+                return "Проверьте права доступа и при необходимости измените их";
 
             }
 

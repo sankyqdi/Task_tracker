@@ -98,7 +98,7 @@ public class JsonManager {
     }
 
 
-    public boolean checkingAvailability(Long id) throws FileNotFoundException {
+    public boolean checkingAvailability(Long id)  {
 
         if(id == null) {
 
@@ -108,7 +108,15 @@ public class JsonManager {
 
         String idStr = String.valueOf(id);
 
-        return SaveJsonFile.searchTaskById(JSON_FILE_PATH.toFile(), idStr.trim());
+        try {
+
+            return SaveJsonFile.searchTaskById(JSON_FILE_PATH.toFile(), idStr.trim());
+
+        } catch (FileNotFoundException e) {
+
+            throw new JsonError(JSON_FILE_PATH, e);
+
+        }
 
     }
 

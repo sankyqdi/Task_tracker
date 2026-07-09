@@ -1,0 +1,24 @@
+📋 Выберите теги для задачи (можно несколько):
+
+1. 🐛 Bug
+2. ✨ Feature
+3. ⚡ Enhancement
+4. 📚 Documentation
+5. ♻️ Refactoring
+6. 🧪 Testing
+7. ⚙️ Performance
+8. 🔒 Security
+9. ⚠️ Urgent
+10. 🚫 Blocked
+11. 👀 Review
+12. 🚀 Deployment
+13. ⬅️ Backend
+14. ➡️ Frontend
+15. 🛠️ DevOps
+-1. 📌 Custom
+
+Для добавления кастомных тегов:
+    1) Пустой тег не будет создан
+    2) Ограничение по символам - 35
+
+Если вы добавили все нужные вам теги введите "0", чтобы перейти к следующему этапу.
