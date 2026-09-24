@@ -61,7 +61,7 @@
    
     <img width="200" height="150" alt="carbon(4)" src="https://github.com/user-attachments/assets/f80fe60b-a533-487d-b937-db1919c26272" />
 
-  Linux / macOS:
+   Linux / macOS:
   
-  <img width="200" height="150" alt="carbon(5)" src="https://github.com/user-attachments/assets/5fab623b-06b3-4ee4-bbc8-0568a14c2fbd" />
+   <img width="200" height="150" alt="carbon(5)" src="https://github.com/user-attachments/assets/5fab623b-06b3-4ee4-bbc8-0568a14c2fbd" />
 
